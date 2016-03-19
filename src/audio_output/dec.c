@@ -345,7 +345,7 @@ int aout_DecPlay (audio_output_t *aout, block_t *block, int input_rate)
                                  / owner->input_format.i_rate;
 
 
-    printf("i_length : %d, i_rate : %d, i_nb_samples : %d, input_rate : %d\n",block->i_length,owner->input_format.i_rate,block->i_nb_samples,input_rate);
+//    printf("i_length : %d, i_rate : %d, i_nb_samples : %d, input_rate : %d\n",block->i_length,owner->input_format.i_rate,block->i_nb_samples,input_rate);
     aout_OutputLock (aout);
     if (unlikely(aout_CheckReady (aout)))
         goto drop; /* Pipeline is unrecoverably broken :-( */

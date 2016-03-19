@@ -136,5 +136,8 @@ void input_clock_SetJitter( input_clock_t *,
  */
 mtime_t input_clock_GetJitter( input_clock_t * );
 input_clock_t* copyClock(input_clock_t *p_clock);
-
+mtime_t clock_Get_Time_stream(input_clock_t *p_clock);
+mtime_t clock_Get_Time_system(input_clock_t *p_clock);
+void clock_Set_delay(input_clock_t *p_clock, int delay);
+void input_clock_Set_hasReference(input_clock_t *p_clock, bool flag);
 #endif

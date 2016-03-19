@@ -414,7 +414,7 @@ int input_clock_ConvertTS( vlc_object_t *p_object, input_clock_t *cl,
     if( pi_rate )
     {
         *pi_rate = cl->i_rate;
-        printf("clock i_rate sadam: %d\n", cl->i_rate);
+//        printf("clock i_rate sadam: %d\n", cl->i_rate);
     }
 
     if( !cl->b_has_reference )
@@ -608,7 +608,7 @@ static mtime_t ClockStreamToSystem( input_clock_t *cl, mtime_t i_stream )
         return VLC_TS_INVALID;
 
     return ( i_stream - cl->ref.i_stream ) * cl->i_rate / INPUT_RATE_DEFAULT +
-           cl->ref.i_system;
+           cl->ref.i_system ;
 }
 
 /*****************************************************************************
@@ -673,6 +673,24 @@ static void AvgRescale( average_t *p_avg, int i_divider )
     p_avg->i_divider = i_divider;
     p_avg->i_value   = i_tmp / p_avg->i_divider;
     p_avg->i_residue = i_tmp % p_avg->i_divider;
+}
+
+
+mtime_t clock_Get_Time_stream(input_clock_t *p_clock){
+	return p_clock->last.i_stream;
+}
+
+mtime_t clock_Get_Time_system(input_clock_t *p_clock){
+	return p_clock->last.i_system;
+}
+
+void clock_Set_delay(input_clock_t *p_clock, int delay){
+	p_clock->i_pts_delay = delay;
+}
+
+void input_clock_Set_hasReference(input_clock_t *p_clock, bool flag){
+	p_clock->b_has_reference = flag;
+
 }
 
 input_clock_t* copyClock(input_clock_t *p_clock)

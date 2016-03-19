@@ -111,4 +111,8 @@ size_t input_DecoderGetFifoSize( decoder_t *p_dec );
  */
 void input_DecoderGetObjects( decoder_t *, vout_thread_t **, audio_output_t ** );
 
+void setAudioClock(input_clock_t* p_audioClock);
+void setVideoClock(input_clock_t* p_videoClock);
+
+
 #endif

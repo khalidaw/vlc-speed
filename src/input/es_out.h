@@ -26,7 +26,7 @@
 #define LIBVLC_INPUT_ES_OUT_H 1
 
 #include <vlc_common.h>
-
+#include "clock.h"
 enum es_out_mode_e
 {
     ES_OUT_MODE_NONE,   /* don't select anything */

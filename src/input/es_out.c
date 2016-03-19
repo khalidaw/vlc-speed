@@ -780,7 +780,6 @@ static bool EsOutIsExtraBufferingAllowed( es_out_t *out )
     for( int i = 0; i < p_sys->i_es; i++ )
     {
         es_out_id_t *p_es = p_sys->es[i];
-
         if( p_es->p_dec )
             i_size += input_DecoderGetFifoSize( p_es->p_dec );
         if( p_es->p_dec_record )
@@ -1643,12 +1642,19 @@ static void EsCreateDecoder( es_out_t *out, es_out_id_t *p_es )
     if(p_es->fmt.i_cat  == AUDIO_ES  ){
 //    	    input_clock_ChangeRate(p_clock, 666);
     		p_clock = copyClock(p_es->p_pgrm->p_clock);
-    		input_clock_ChangeRate(p_clock, 666);
+
+    		assert(p_clock != NULL);
+//    		input_clock_ChangeRate(p_clock, 1000);
+    		setAudioClock(p_clock);
+
             p_es->p_dec = input_DecoderNew( p_input, &p_es->fmt, p_clock, p_input->p->p_sout );
 
-    }
-    if(p_es->fmt.i_cat  == VIDEO_ES ){
 
+    }
+
+    if(p_es->fmt.i_cat  == VIDEO_ES ){
+    	setVideoClock(p_es->p_pgrm->p_clock);
+//    	sleep(1);
         p_es->p_dec = input_DecoderNew( p_input, &p_es->fmt,  p_es->p_pgrm->p_clock, p_input->p->p_sout );
 
     }
@@ -2423,17 +2429,22 @@ static int EsOutControlLocked( es_out_t *out, int i_query, va_list args )
                             i_pcr, mdate() );
 
 
-//
-//        if( !p_sys->p_pgrm )
-//            return VLC_SUCCESS;
-//
-//        if( p_sys->b_buffering )
-//        {
-//            /* Check buffering state on master clock update */
-//            EsOutDecodersStopBuffering( out, false );
-//        }
-//        else if( p_pgrm == p_sys->p_pgrm )
-//        {
+
+        if( !p_sys->p_pgrm )
+            return VLC_SUCCESS;
+
+        if( p_sys->b_buffering )
+        {
+            /* Check buffering state on master clock update */
+//        	const int i_id = va_arg( args, int );
+//        	es_out_id_t *p_es = EsOutGetFromID( out, i_id );
+//        	if (input_DecoderGetFifoSize(p_es->p_dec) < 10){
+        		EsOutDecodersStopBuffering( out, false ); // here is the problem
+//        	}
+//            EsOutDecodersStopBuffering( out2, false );
+        }
+        else if( p_pgrm == p_sys->p_pgrm )
+        {
 //            if( b_late && ( !p_sys->p_input->p->p_sout ||
 //                                 !p_sys->p_input->p->b_out_pace_control ) )
 //            {
@@ -2504,8 +2515,8 @@ static int EsOutControlLocked( es_out_t *out, int i_query, va_list args )
 //
 //                es_out_SetJitter( out2, i_pts_delay_base, i_pts_delay - i_pts_delay_base, p_sys->i_cr_average );
 //            }
-//
-//        }
+
+        }
         return VLC_SUCCESS;
     }
 
@@ -2736,12 +2747,15 @@ static int EsOutControlLocked( es_out_t *out, int i_query, va_list args )
 
         assert( i_date == -1 );
         EsOutChangePosition( out );
+        EsOutChangePosition( out2 );
 
         return VLC_SUCCESS;
     }
 
     case ES_OUT_SET_FRAME_NEXT:
         EsOutFrameNext( out );
+        EsOutFrameNext( out2 );
+
         return VLC_SUCCESS;
 
     case ES_OUT_SET_TIMES:
@@ -3169,3 +3183,4 @@ static void EsOutUpdateInfo( es_out_t *out, es_out_id_t *es, const es_format_t *
     /* */
     input_Control( p_input, INPUT_REPLACE_INFOS, p_cat );
 }
+
