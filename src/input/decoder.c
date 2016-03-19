@@ -845,13 +845,19 @@ void updateSystemClock() {
 void chaneRateContinuosly(input_clock_t *p_clock, float rate)
 {
 	float oldRate = input_clock_GetRate(p_clock);
+	int step = (oldRate - rate);
+
+	step = step > 0 ? step : - step;
+
 	if(rate > oldRate){
-		for(int i = 0 ; i < 100; i++){
-			input_clock_ChangeRate(p_clock, oldRate + 100*(rate - oldRate)/i);
+		for(int i = 0 ; i < step; i++){
+			usleep(10);
+			input_clock_ChangeRate(p_clock, oldRate + (i+1)*(rate - oldRate)/(step));
 		}
 	} else {
-		for(int i = 0 ; i < 100; i++){
-			input_clock_ChangeRate(p_clock, oldRate - 100*(oldRate - rate)/i);
+		for(int i = 0 ; i < step; i++){
+			usleep(10);
+			input_clock_ChangeRate(p_clock, oldRate - (i+1)*(oldRate - rate)/(step));
 		}
 	}
 }
@@ -903,7 +909,8 @@ void *ManageClocksThread(void *args) {
 		if (!strcmp(command, "sleep")) {
 			sleep(input);
 		} else if (!strcmp(command, "rate")) {
-			input_clock_ChangeRate(currentClock, 1000*input);
+//			input_clock_ChangeRate(currentClock, 1000*input);
+			chaneRateContinuosly(currentClock, 1000*input);
 			updateSystemClock();
 		} else if(!strcmp(command, "pause")){
 			input_clock_ChangePause(currentClock,true,1283);
@@ -959,7 +966,7 @@ static void *DecoderThread(void *p_data) {
 
 //		}
 
-        printf("Size of fifo : %d \n", size);
+//        printf("Size of fifo : %d \n", size);
 //        printf("Size of block is : %d \n",p_block->i_size);
 //        printf("length is : %d \n",p_block->i_length);
 		//amawasi
