@@ -55,6 +55,7 @@
 
 input_clock_t *p_clock;
 es_out_t *out2;
+input_clock_t *p_clock2;
 
 
 /*****************************************************************************
@@ -1653,9 +1654,12 @@ static void EsCreateDecoder( es_out_t *out, es_out_id_t *p_es )
     }
 
     if(p_es->fmt.i_cat  == VIDEO_ES ){
-    	setVideoClock(p_es->p_pgrm->p_clock);
+    	p_clock2 = copyClock(p_es->p_pgrm->p_clock);
+		assert(p_clock != NULL);
+
+    	setVideoClock(p_clock2);
 //    	sleep(1);
-        p_es->p_dec = input_DecoderNew( p_input, &p_es->fmt,  p_es->p_pgrm->p_clock, p_input->p->p_sout );
+        p_es->p_dec = input_DecoderNew( p_input, &p_es->fmt,  p_clock2, p_input->p->p_sout );
 
     }
 
@@ -2421,13 +2425,18 @@ static int EsOutControlLocked( es_out_t *out, int i_query, va_list args )
                             p_sys->p_input->p->b_can_pace_control || p_sys->b_buffering,
                             EsOutIsExtraBufferingAllowed( out ),
                             i_pcr, mdate() );
-
+        setSystemClock(p_pgrm->p_clock);
         input_clock_Update( p_clock, VLC_OBJECT(p_sys->p_input),
                             &b_late2,
                             p_sys->p_input->p->b_can_pace_control || p_sys->b_buffering,
                             EsOutIsExtraBufferingAllowed( out ),
                             i_pcr, mdate() );
 
+        input_clock_Update( p_clock2, VLC_OBJECT(p_sys->p_input),
+                            &b_late2,
+                            p_sys->p_input->p->b_can_pace_control || p_sys->b_buffering,
+                            EsOutIsExtraBufferingAllowed( out ),
+                            i_pcr, mdate() );
 
 
         if( !p_sys->p_pgrm )

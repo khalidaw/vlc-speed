@@ -807,6 +807,7 @@ static decoder_t * CreateDecoder(vlc_object_t *p_parent,
 //----------------------------------------------------//
 static input_clock_t* audioClock = NULL;
 static input_clock_t* videoClock = NULL;
+static input_clock_t* systemClock = NULL;
 
 typedef enum{
 	threadAudio,
@@ -820,7 +821,9 @@ void setAudioClock(input_clock_t* p_audioClock) {
 void setVideoClock(input_clock_t* p_videoClock) {
 	videoClock = p_videoClock;
 }
-
+void setSystemClock(input_clock_t* p_sysClock){
+	systemClock = p_sysClock;
+}
 void setVideoRate(int rate) {
 	input_clock_ChangeRate(videoClock, rate);
 
@@ -829,9 +832,13 @@ void setVideoRate(int rate) {
 void setAudioRate(int rate) {
 	input_clock_ChangeRate(audioClock, rate);
 }
-static void noSyncZiad(float videoSpeed, float audioSpeed) {
-	setVideoRate(videoSpeed);
-	setAudioRate(audioSpeed);
+
+void setSystemRate(int rate) {
+	input_clock_ChangeRate(systemClock, rate);
+}
+
+void updateSystemClock() {
+	setSystemRate(input_clock_GetRate(audioClock) < input_clock_GetRate(videoClock) ? input_clock_GetRate(audioClock) : input_clock_GetRate(videoClock));
 }
 
 
@@ -897,6 +904,7 @@ void *ManageClocksThread(void *args) {
 			sleep(input);
 		} else if (!strcmp(command, "rate")) {
 			input_clock_ChangeRate(currentClock, 1000*input);
+			updateSystemClock();
 		} else if(!strcmp(command, "pause")){
 			input_clock_ChangePause(currentClock,true,1283);
 		}
